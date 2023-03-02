@@ -1,5 +1,12 @@
 import React from "react";
 
+import {
+  AccountCircleOutlined,
+  ChatBubbleOutline,
+  PeopleAltOutlined,
+  StarOutlineRounded,
+  VillaOutlined,
+} from "@mui/icons-material";
 import { AuthProvider, Refine } from "@pankod/refine-core";
 import {
   CssBaseline,
@@ -10,20 +17,14 @@ import {
   RefineSnackbarProvider,
 } from "@pankod/refine-mui";
 
-import {
-  AccountCircleOutlined,
-  ChatBubbleOutline,
-  PeopleAltOutlined,
-  StarOutlineRounded,
-  VillaOutlined,
-} from "@mui/icons-material";
-import { MuiInferencer } from "@pankod/refine-inferencer/mui";
 import routerProvider from "@pankod/refine-react-router-v6";
 import dataProvider from "@pankod/refine-simple-rest";
 import axios, { AxiosRequestConfig } from "axios";
 import { Header, Layout, Sider, Title } from "components/layout";
 import { ColorModeContextProvider } from "contexts";
 import { CredentialResponse } from "interfaces/google";
+import { parseJwt } from "utils/parse-jwt";
+
 import {
   AgentProfile,
   Agents,
@@ -35,8 +36,6 @@ import {
   MyProfile,
   PropertyDetails,
 } from "pages";
-import createProperty from "pages/create-property";
-import { parseJwt } from "utils/parse-jwt";
 
 const axiosInstance = axios.create();
 axiosInstance.interceptors.request.use((request: AxiosRequestConfig) => {
@@ -54,19 +53,35 @@ axiosInstance.interceptors.request.use((request: AxiosRequestConfig) => {
 
 function App() {
   const authProvider: AuthProvider = {
-    login: ({ credential }: CredentialResponse) => {
+    login: async ({ credential }: CredentialResponse) => {
       const profileObj = credential ? parseJwt(credential) : null;
 
       if (profileObj) {
-        localStorage.setItem(
-          "user",
-          JSON.stringify({
-            ...profileObj,
+        const response = await fetch("http://localhost:8080/api/v1/users", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: profileObj.name,
+            email: profileObj.email,
             avatar: profileObj.picture,
-          })
-        );
-      }
+          }),
+        });
 
+        const data = await response.json();
+
+        if (response.status === 200) {
+          localStorage.setItem(
+            "user",
+            JSON.stringify({
+              ...profileObj,
+              avatar: profileObj.picture,
+              userid: data._id,
+            })
+          );
+        } else {
+          return Promise.reject();
+        }
+      }
       localStorage.setItem("token", `${credential}`);
 
       return Promise.resolve();
@@ -110,7 +125,7 @@ function App() {
       <GlobalStyles styles={{ html: { WebkitFontSmoothing: "auto" } }} />
       <RefineSnackbarProvider>
         <Refine
-          dataProvider={dataProvider("https://api.fake-rest.refine.dev")}
+          dataProvider={dataProvider("http://localhost:8080/api/v1")}
           notificationProvider={notificationProvider}
           ReadyPage={ReadyPage}
           catchAll={<ErrorComponent />}
@@ -119,7 +134,7 @@ function App() {
               name: "properties",
               list: AllProperties,
               show: PropertyDetails,
-              create: createProperty,
+              create: CreateProperty,
               edit: EditProperty,
               icon: <VillaOutlined />,
             },
