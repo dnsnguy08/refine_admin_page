@@ -1,14 +1,12 @@
 import { useGetIdentity } from "@pankod/refine-core";
 import { FieldValues, useForm } from "@pankod/refine-react-hook-form";
-import { useNavigate } from "@pankod/refine-react-router-v6";
+import { useState } from "react";
+
 import Form from "components/common/Form";
-import React, { useState } from "react";
 
 const CreateProperty = () => {
-  const navigate = useNavigate();
   const { data: user } = useGetIdentity();
   const [propertyImage, setPropertyImage] = useState({ name: "", url: "" });
-
   const {
     refineCore: { onFinish, formLoading },
     register,
@@ -30,7 +28,8 @@ const CreateProperty = () => {
 
   const onFinishHandler = async (data: FieldValues) => {
     if (!propertyImage.name) return alert("Please select an image");
-    await onFinishHandler({
+
+    await onFinish({
       ...data,
       photo: propertyImage.url,
       email: user.email,
@@ -50,5 +49,4 @@ const CreateProperty = () => {
     />
   );
 };
-
 export default CreateProperty;
