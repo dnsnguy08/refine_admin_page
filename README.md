@@ -15,8 +15,7 @@
 
 ### The challenge
 
-Create a real estate dashboard for members to create, update, delete and view property listings. Use Refine framework for CRUD operations, MongoDB for the backend, and Material UI 
-to for the frontend.
+Create a real estate dashboard for members to create, update, delete and view property listings. Use Refine framework for CRUD operations, MongoDB for the backend, and Material UI for the frontend.
 
 ### Highlights
 
