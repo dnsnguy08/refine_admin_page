@@ -22,7 +22,7 @@ const AgentCard = ({
   const { data: currentUser } = useGetIdentity();
   const generateLink = () => {
     if (currentUser.email === email) return "/my-profile";
-    return `/agent/show/${id}`;
+    return `/agents/show/${id}`;
   };
 
   return (
